@@ -1,0 +1,74 @@
+<div class="row login-tab">
+    <div class="col s12 m8 l4 offset-m2 offset-l4">
+        <ul class="tabs">
+            <li class="tab col s6">
+                <a href="#login">Login</a>
+            </li>
+            <li class="tab col s6">
+                <a href="#register">Cadastrar</a>
+            </li>
+        </ul>
+
+        <div id="login" class="col s12 white">
+            <form id="form_login" style="padding: 1em;" onsubmit="login(); return false;">
+                <div class="row">
+                    <div class="input-field">
+                        <input type="email" name="email" id="email" required>
+                        <label for="email">E-mail</label>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="input-field">
+                        <input type="password" name="password" id="password">
+                        <label for="password">Senha</label>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <button type="submit" class="btn green">Entrar</button>
+                </div>
+            </form>
+        </div>
+
+        <div id="register" class="col s12 white">
+            <p>Em breve!</p>
+        </div>
+    </div>
+</div>
+
+<script>
+    
+
+    const login = function () {
+        let cookie = Cookie.getCookie();
+
+        if (cookie.auth) {
+            to('cliente/lista');
+            return;
+        }
+
+        
+        var username = $('#form_login').find('input[name=email]').val();
+        var password = $('#form_login').find('input[name=password]').val();
+
+        $.ajax({
+            type: 'get',
+            url: 'http://localhost:8000/api/login',
+            headers: {
+                "Authorization": "Basic " + btoa(username + ":" + password)
+            },
+        }).done(function () {
+            document.cookie = 'auth=' + btoa(username + ":" + password);
+            to('cliente/lista');
+        }).fail(function (result) {
+            var toastHTML = '<span>*Email ou senha incorretos</span>';
+            M.toast({ html: toastHTML, classes: 'rounded' });
+        });
+    };
+
+
+    $(document).ready(function () {
+        $('.tabs').tabs();
+    });
+</script>

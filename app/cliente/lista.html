@@ -1,0 +1,114 @@
+<div class="row">
+    <div class="col s12 white">
+        <h1>Lista de clientes <a class="btn-floating btn-large waves-effect waves-light green right" href="?r=cliente/formulario&action=create"><i class="material-icons">add</i></a></h1>
+
+        <table class="responsive-table" id="table-cliente">
+            <thead>
+                <tr>
+                    <th>Nome</th>
+                    <th>E-mail</th>
+                    <th>Telefone</th>
+                    <th>Estado</th>
+                    <th>Cidade</th>
+                    <th>Plano</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+
+        <ul class="pagination">
+            <li class="waves-effect prev-page">
+                <a href="#"><i class="material-icons">chevron_left</i></a>
+            </li>
+            <li class="active current-page green">
+                <a href="#"></a>
+            </li>
+            <li class="waves-effect next-page">
+                <a href="#"><i class="material-icons">chevron_right</i></a>
+            </li>
+        </ul>
+    </div>
+</div>
+
+<!-- Modal Structure -->
+<div id="modal-delete" class="modal">
+    <div class="modal-content">
+        <h4>Excluir o cliente?</h4>
+    </div>
+    <div class="modal-footer">
+        <a href="#!" class="modal-close waves-effect waves-green btn-flat btn-confirm">Sim</a>
+    </div>
+</div>
+
+<script>
+
+    var fillTable = function (data) {
+        $('#table-cliente').find('tbody').empty();
+        data.data.forEach(element => {
+            let planos = element.planos.map(function (plano) {
+                return plano.nome;
+            });
+
+            let row =
+                `<tr>
+                    <td>${element.nome}</td>
+                    <td>${element.email}</td>
+                    <td>${element.telefone}</td>
+                    <td>${element.estado}</td>
+                    <td>${element.cidade}</td>
+                    <td>${planos.toString()}</td>
+                    <td>
+                        <a class="btn green" href="?r=cliente/formulario&action=update&id=${element.id}">editar</a>
+                        <button onClick="confirmDelete(${element.id})" class="btn red">Excluir</button>
+                    </td>
+                </tr>`;
+            $('#table-cliente tbody').append(row);
+        });
+
+        $('ul.pagination .current-page a').text(data.current_page);
+        if (data.next_page_url) {
+            $('ul.pagination li.next-page').removeClass('disabled');
+            $('ul.pagination li.next-page a').attr('href', `?r=cliente/lista&page=${+data.current_page + 1}`);
+        } else {
+            $('ul.pagination li.next-page').addClass('disabled');
+            $('ul.pagination li.next-page a').attr('href', `#`);
+        }
+
+        if (data.prev_page_url) {
+            $('ul.pagination li.prev-page').removeClass('disabled');
+            $('ul.pagination li.prev-page a').attr('href', `?r=cliente/lista&page=${+data.current_page - 1}`);
+        } else {
+            $('ul.pagination li.prev-page').addClass('disabled');
+        }
+    };
+
+    var confirmDelete = function (id) {
+        let modal = $('#modal-delete');
+        var instance = M.Modal.getInstance(modal);
+        modal.find('a.btn-confirm').on('click', function () {
+            call(`cliente/${id}`, 'delete', null, function () {
+                let toastHTML = '<span>*Cliente excluido com sucesso!</span>';
+                M.toast({ html: toastHTML, classes: 'rounded' });
+                modal.bind('click');
+
+                // reload table
+                call('cliente', 'get', {page: 1}, fillTable);
+            }, function (response) {
+                let toastHTML = '<span>Esse cliente não pode excluido!</span>';
+                M.toast({ html: toastHTML, classes: 'rounded' });
+            });
+        });
+
+        instance.open();
+    };
+
+    $(document).ready(function () {
+        $('.modal').modal();
+
+        let urlParam = new URLSearchParams(window.location.search);
+        let page = urlParam.get('page');
+
+        call('cliente', 'get', {page: page}, fillTable);
+    });
+</script>

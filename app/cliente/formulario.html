@@ -1,0 +1,115 @@
+<div class="row">
+    <div class="col s12 white">
+        <h1>Formulário do cliente</h1>
+
+        <div class="col s11">
+            <form id="form-cliente" onsubmit="saveCliente(); return false;">
+                <input type="hidden" id="cliente-id" name="id" value="">
+                <div class="row">
+                    <div class="input-field col s12">
+                        <input type="text" name="nome" id="cliente-nome" required>
+                        <label for="cliente-nome">Nome</label>
+                    </div>
+
+                    <div class="input-field col s12 m6">
+                        <input type="email" name="email" id="cliente-email" required>
+                        <label for="email">E-mail</label>
+                    </div>
+
+                    <div class="input-field col s12 m6">
+                        <input type="text" name="telefone" id="cliente-telefone" required>
+                        <label for="cliente-telefone">Telefone (xx)xxxx-xxxx</label>
+                    </div>
+
+                    <div class="input-field col s12 m6">
+                        <input type="text" name="estado" id="cliente-estado" required>
+                        <label for="cliente-estado">Estado</label>
+                    </div>
+
+                    <div class="input-field col s12 m6">
+                        <input type="text" name="cidade" id="cliente-cidade" required>
+                        <label for="cliente-cidade">Cidade</label>
+                    </div>
+
+                    <div class="input-field col s12 m6">
+                        <input type="text" name="data_de_nascimento" id="cliente-data-de-nascimento" required>
+                        <label for="cliente-data-de-nascimento">Data de Nascimento dd/mm/aaaa</label>
+                    </div>
+
+                    <div class="input-field col s12 m6">
+                        <select name="plano" id="cliente-plano" required></select>
+                        <label for="cliente-plano">Plano</label>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <button class="btn green" type="submit">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    let urlParam = new URLSearchParams(window.location.search);
+
+    var saveCliente = function () {
+        let formdata = $('#form-cliente').serialize();
+        let verb = '';
+        let url = '';
+        
+        if (urlParam.get('action') === 'update') {
+            verb = 'put';
+            url = 'cliente/'+urlParam.get('id');
+        } else if (urlParam.get('action') === 'create') {
+            verb = 'post';
+            url = 'cliente';
+        }
+
+        call(url, verb, formdata, function (response) {
+            let toastHTML = '<span>*Cliente salvo com sucesso!</span>';
+            M.toast({ html: toastHTML, classes: 'rounded' });
+        });
+    };
+
+    var getCliente = function (id) {
+        call(`cliente/${id}`, 'get', null, function (cliente){
+
+            // fill form
+            $('#cliente-id').val(cliente.id);
+            $('#cliente-nome').val(cliente.nome);
+            $('#cliente-telefone').val(cliente.telefone);
+            $('#cliente-estado').val(cliente.estado);
+            $('#cliente-email').val(cliente.email);
+            $('#cliente-cidade').val(cliente.cidade);
+            $('#cliente-data-de-nascimento').val(cliente.data_de_nascimento);
+            $('#cliente-plano').val(cliente.planos[0].id);
+            
+
+            M.updateTextFields();
+            $("#cliente-plano").formSelect();
+        });
+    }
+
+
+    $(document).ready(function () {
+        
+        let action = urlParam.get('action');
+        let id = urlParam.get('id');
+
+        call('plano', 'get', null, function (response) {
+            response.data.forEach(element => {
+                mensalidade = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', maximumSignificantDigits: 3 }).format(element.mensalidade);
+                let content = `<option value="${element.id}">${element.nome} - ${mensalidade}</option>`;
+                $('#cliente-plano').append(content);
+                
+            });
+            $('#cliente-plano').formSelect();
+        });
+
+        if (action && id) {
+            getCliente(id);
+        }
+    });
+</script>
