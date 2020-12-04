@@ -60,6 +60,7 @@
             },
         }).done(function () {
             document.cookie = 'auth=' + btoa(username + ":" + password);
+            $('nav').show();
             to('cliente/lista');
         }).fail(function (result) {
             var toastHTML = '<span>*Email ou senha incorretos</span>';

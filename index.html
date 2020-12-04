@@ -44,7 +44,7 @@
 </head>
 <body class="green darken-1">
     <header>
-        <nav class="grey darken-4">
+        <nav class="grey darken-4" style="display: none;">
             <div class="nav-wrapper">
                 <a href="http://localhost/origo_test_app" class="brand-logo">Logo</a>
                 <ul id="nav-mobile" class="right hide-on-med-and-down">
@@ -123,8 +123,16 @@
             let urlParams = new URLSearchParams(window.location.search);
             let route = urlParams.get('r');
             let cookie = Cookie.getCookie();
+            console.log(route);
 
-            (route && cookie.hasOwnProperty('auth')) ? to(route) : to('login/login');
+            if (cookie.hasOwnProperty('auth')) $('nav').show();
+            if (cookie.hasOwnProperty('auth') && (!route || route === 'login/login')){
+                to('cliente/lista');
+            } else if (route && cookie.hasOwnProperty('auth')) {
+                to(route);
+            } else {
+                to('login/login');
+            }
         });
     </script>
 </body>
