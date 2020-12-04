@@ -90,13 +90,14 @@
             call(`cliente/${id}`, 'delete', null, function () {
                 let toastHTML = '<span>*Cliente excluido com sucesso!</span>';
                 M.toast({ html: toastHTML, classes: 'rounded' });
-                modal.bind('click');
+                modal.find('a.btn-confirm').unbind('click');
 
                 // reload table
                 call('cliente', 'get', {page: 1}, fillTable);
             }, function (response) {
                 let toastHTML = '<span>Esse cliente não pode excluido!</span>';
                 M.toast({ html: toastHTML, classes: 'rounded' });
+                modal.find('a.btn-confirm').unbind('click');
             });
         });
 
